@@ -8,38 +8,62 @@ export default class NewTaskForm extends Component {
     };
 
     state = {
-        value: '',
+        valueTask: '',
+        valueMin: '',
+        valueSec: '',
     };
 
     clearValue = () => {
         this.setState({
-            value: '',
+            valueTask: '',
+            valueMin: '',
+            valueSec: '',
         });
     };
 
     onSubmit = (event) => {
+        const { valueTask, valueMin, valueSec } = this.state;
         event.preventDefault();
-        this.props.addItem(this.state.value);
+        this.props.addItem(valueTask, valueMin, valueSec);
         this.clearValue();
     };
 
     changeValue = (event) => {
-        this.setState({
-            value: event.target.value,
-        });
+        if (event.target.placeholder === 'Min') {
+            this.setState({ valueMin: event.target.value });
+        } else if (event.target.placeholder === 'Sec') {
+            this.setState({ valueSec: event.target.value });
+        } else this.setState({ valueTask: event.target.value });
     };
 
     render() {
+        const { valueTask, valueMin, valueSec } = this.state;
+
         return (
-            <form onSubmit={(event) => this.onSubmit(event)}>
+            <form className="new-todo-form" onSubmit={this.onSubmit}>
                 <h1>Todos</h1>
                 <input
-                    onChange={(event) => this.changeValue(event)}
-                    value={this.state.value}
+                    onChange={this.changeValue}
+                    value={valueTask}
                     className="new-todo"
                     placeholder="What needs to be done?"
                     autoFocus
                 />
+                <input
+                    onChange={this.changeValue}
+                    className="new-todo-form__timer"
+                    placeholder="Min"
+                    value={valueMin}
+                    autoFocus
+                />
+                <input
+                    onChange={this.changeValue}
+                    className="new-todo-form__timer"
+                    placeholder="Sec"
+                    value={valueSec}
+                    autoFocus
+                />
+                <button type="submit" />
             </form>
         );
     }
