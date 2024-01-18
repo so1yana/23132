@@ -60,7 +60,7 @@ export default class Task extends Component {
         const { timer, paused } = this.state;
         this.setState({ updating: true });
         if (!paused) {
-            this.setState({ timerDir: timer === 0 ? 'down' : 'up' });
+            this.setState({ timerDir: timer === 0 ? 'up' : 'down' });
         }
         const timerInt = setInterval(() => this.updateTime(), 1000);
         this.setState({ timerInt });
