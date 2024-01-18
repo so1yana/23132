@@ -26,7 +26,7 @@ export default class Task extends Component {
         editing: false,
         text: this.props.label,
         timer: this.props.time,
-        paused: false,
+        wasPaused: false,
         updating: false,
         timerDir: 'up',
     };
@@ -34,6 +34,7 @@ export default class Task extends Component {
     componentWillUnmount() {
         const { setTime, id } = this.props;
         const { timer } = this.state;
+        this.pauseTimer();
         setTime(id, timer);
         clearInterval(this.state.timerInt);
     }
@@ -57,21 +58,20 @@ export default class Task extends Component {
 
     startTimer = () => {
         if (this.state.updating) return;
-        const { timer, paused } = this.state;
+        const { timer, wasPaused } = this.state;
         this.setState({ updating: true });
-        if (!paused) {
+        if (!wasPaused) {
             this.setState({ timerDir: timer === 0 ? 'up' : 'down' });
         }
         const timerInt = setInterval(() => this.updateTime(), 1000);
         this.setState({ timerInt });
-        this.setState({ paused: false });
     };
 
     pauseTimer = () => {
         if (!this.state.updating) return;
         clearInterval(this.state.timerInt);
         this.setState({ updating: false });
-        this.setState({ paused: true });
+        this.setState({ wasPaused: true });
     };
 
     updateTime = () => {
