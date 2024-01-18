@@ -1,4 +1,4 @@
-import { Component, StrictMode } from 'react';
+import { Component } from 'react';
 import Footer from '../footer';
 import NewTaskForm from '../new-task-form';
 import TaskList from '../task-list';
@@ -12,13 +12,11 @@ export default class App extends Component {
     };
 
     makeItem = (label, min, sec) => {
-        const { todos } = this.state;
-        let id = 1;
+        const id = String(label + String(Math.floor(Math.random() * 12345)));
         const normalMin = Number(min);
         const normalSec = Number(sec);
-        let timer = (normalMin * 60 + normalSec) * 1000;
+        let timer = normalMin * 60 + normalSec;
         if (Number.isNaN(timer)) timer = 0;
-        if (todos.length > 0) id = todos[todos.length - 1].id + 1;
         return {
             id,
             checked: false,
@@ -42,6 +40,7 @@ export default class App extends Component {
             if (elem.id === id) {
                 if (typeof value === 'string') elem.label = value;
                 else if (typeof value === 'boolean') elem.checked = value;
+                else if (typeof value === 'number') elem.timer = value;
             }
             return elem;
         });
@@ -49,6 +48,10 @@ export default class App extends Component {
         this.setState({
             todos: newArr,
         });
+    };
+
+    setTime = (id, time) => {
+        this.makeNewArray(id, time);
     };
 
     itemCompleted = (id, checked) => {
@@ -97,25 +100,23 @@ export default class App extends Component {
 
     render() {
         const itemsLeft = this.state.todos.reduce((acc, el) => (!el.checked ? ++acc : acc), 0);
-
         return (
-            <StrictMode>
-                <section className="todoapp">
-                    <NewTaskForm addItem={this.addItem} />
-                    <TaskList
-                        todos={this.filterItems()}
-                        itemCompleted={this.itemCompleted}
-                        deleteItem={this.deleteItem}
-                        editItem={this.editItem}
-                    />
-                    <Footer
-                        filter={this.state.filter}
-                        changeFilter={this.changeFilter}
-                        itemsLeft={itemsLeft}
-                        deleteAllCheckedTasks={this.deleteAllCheckedTasks}
-                    />
-                </section>
-            </StrictMode>
+            <section className="todoapp">
+                <NewTaskForm addItem={this.addItem} />
+                <TaskList
+                    todos={this.filterItems()}
+                    itemCompleted={this.itemCompleted}
+                    deleteItem={this.deleteItem}
+                    editItem={this.editItem}
+                    setTime={this.setTime}
+                />
+                <Footer
+                    filter={this.state.filter}
+                    changeFilter={this.changeFilter}
+                    itemsLeft={itemsLeft}
+                    deleteAllCheckedTasks={this.deleteAllCheckedTasks}
+                />
+            </section>
         );
     }
 }
