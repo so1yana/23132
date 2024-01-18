@@ -20,15 +20,18 @@ export default class Task extends Component {
         deleteItem: PropTypes.func.isRequired,
         editItem: PropTypes.func.isRequired,
         setTime: PropTypes.func.isRequired,
+        paused: PropTypes.bool.isRequired,
+        timerDirection: PropTypes.string.isRequired,
+        setDirection: PropTypes.func.isRequired,
     };
 
     state = {
         editing: false,
         text: this.props.label,
         timer: this.props.time,
-        wasPaused: false,
+        wasPaused: this.props.paused,
         updating: false,
-        timerDir: 'up',
+        timerDir: this.props.timerDirection,
     };
 
     componentWillUnmount() {
@@ -59,9 +62,13 @@ export default class Task extends Component {
     startTimer = () => {
         if (this.state.updating) return;
         const { timer, wasPaused } = this.state;
+        const { setDirection, id, checked } = this.props;
+        if (checked) return;
         this.setState({ updating: true });
         if (!wasPaused) {
-            this.setState({ timerDir: timer === 0 ? 'up' : 'down' });
+            const timerDirection = timer === 0 ? 'up' : 'down';
+            setDirection(id, timerDirection);
+            this.setState({ timerDir: timerDirection });
         }
         const timerInt = setInterval(() => this.updateTime(), 1000);
         this.setState({ timerInt });

@@ -23,6 +23,8 @@ export default class App extends Component {
             timer,
             label,
             created: new Date(),
+            paused: false,
+            timerDirection: 'down',
         };
     };
 
@@ -38,9 +40,14 @@ export default class App extends Component {
         const oldArr = this.state.todos.map((el) => el);
         const newArr = oldArr.map((elem) => {
             if (elem.id === id) {
-                if (typeof value === 'string') elem.label = value;
-                else if (typeof value === 'boolean') elem.checked = value;
-                else if (typeof value === 'number') elem.timer = value;
+                if (typeof value === 'string') {
+                    if (value === 'down' || value === 'up') elem.timerDirection = value;
+                    else elem.label = value;
+                } else if (typeof value === 'boolean') elem.checked = value;
+                else if (typeof value === 'number') {
+                    elem.timer = value;
+                    elem.paused = true;
+                }
             }
             return elem;
         });
@@ -52,6 +59,10 @@ export default class App extends Component {
 
     setTime = (id, time) => {
         this.makeNewArray(id, time);
+    };
+
+    setDirection = (id, direction) => {
+        this.makeNewArray(id, direction);
     };
 
     itemCompleted = (id, checked) => {
@@ -109,6 +120,7 @@ export default class App extends Component {
                     deleteItem={this.deleteItem}
                     editItem={this.editItem}
                     setTime={this.setTime}
+                    setDirection={this.setDirection}
                 />
                 <Footer
                     filter={this.state.filter}
