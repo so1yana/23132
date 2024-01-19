@@ -23,8 +23,8 @@ export default class App extends Component {
             timer,
             label,
             created: new Date(),
-            paused: false,
-            timerDirection: 'down',
+            paused: true,
+            interval: null,
         };
     };
 
@@ -36,18 +36,22 @@ export default class App extends Component {
         this.setState(() => ({ todos: newArr }));
     };
 
-    makeNewArray = (id, value) => {
+    changeItem = (id, value) => {
         const oldArr = this.state.todos.map((el) => el);
         const newArr = oldArr.map((elem) => {
             if (elem.id === id) {
                 if (typeof value === 'string') {
-                    if (value === 'down' || value === 'up') elem.timerDirection = value;
-                    else elem.label = value;
+                    if (value === 'updateTime') {
+                        elem.timer += 1;
+                    } else if (value === 'startTimer' && !elem.checked) {
+                        const interval = setInterval(() => this.updateTimer(elem.id), 1000);
+                        elem.interval = interval;
+                        elem.paused = false;
+                    } else if (value === 'pauseTimer' && !elem.paused) {
+                        clearInterval(elem.interval);
+                        elem.paused = true;
+                    } else elem.label = value;
                 } else if (typeof value === 'boolean') elem.checked = value;
-                else if (typeof value === 'number') {
-                    elem.timer = value;
-                    elem.paused = true;
-                }
             }
             return elem;
         });
@@ -57,23 +61,20 @@ export default class App extends Component {
         });
     };
 
-    setTime = (id, time) => {
-        this.makeNewArray(id, time);
-    };
-
-    setDirection = (id, direction) => {
-        this.makeNewArray(id, direction);
+    setTime = (id) => {
+        this.changeItem(id, 'setTime');
     };
 
     itemCompleted = (id, checked) => {
-        this.makeNewArray(id, checked);
+        this.changeItem(id, checked);
     };
 
     editItem = (id, text) => {
-        this.makeNewArray(id, text);
+        this.changeItem(id, text);
     };
 
     deleteItem = (id) => {
+        this.pauseTimer(id);
         this.setState(({ todos }) => {
             const itemId = todos.findIndex((el) => el.id === id);
             const newArray = [...todos.slice(0, itemId), ...todos.slice(itemId + 1)];
@@ -109,6 +110,18 @@ export default class App extends Component {
         });
     };
 
+    startTimer = (id) => {
+        this.changeItem(id, 'startTimer');
+    };
+
+    pauseTimer = (id) => {
+        this.changeItem(id, 'pauseTimer');
+    };
+
+    updateTimer = (id) => {
+        this.changeItem(id, 'updateTime');
+    };
+
     render() {
         const itemsLeft = this.state.todos.reduce((acc, el) => (!el.checked ? ++acc : acc), 0);
         return (
@@ -120,7 +133,9 @@ export default class App extends Component {
                     deleteItem={this.deleteItem}
                     editItem={this.editItem}
                     setTime={this.setTime}
-                    setDirection={this.setDirection}
+                    startTimer={this.startTimer}
+                    pauseTimer={this.pauseTimer}
+                    updateTimer={this.updateTimer}
                 />
                 <Footer
                     filter={this.state.filter}

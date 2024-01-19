@@ -54,7 +54,8 @@ export default class NewTaskForm extends Component {
                     className="new-todo-form__timer"
                     placeholder="Min"
                     value={valueMin}
-                    maxLength={3}
+                    max={999}
+                    type="number"
                     autoFocus
                 />
                 <input
@@ -62,8 +63,9 @@ export default class NewTaskForm extends Component {
                     className="new-todo-form__timer"
                     placeholder="Sec"
                     value={valueSec}
+                    max={59}
+                    type="number"
                     autoFocus
-                    maxLength={2}
                 />
                 <button type="submit" />
             </form>

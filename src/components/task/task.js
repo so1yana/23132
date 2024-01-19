@@ -7,47 +7,36 @@ import './task.css';
 export default class Task extends Component {
     static defaultProps = {
         label: '',
-        time: null,
     };
 
     static propTypes = {
         id: PropTypes.string.isRequired,
         label: PropTypes.string,
-        time: PropTypes.any,
+        timer: PropTypes.any.isRequired,
         checked: PropTypes.bool.isRequired,
         created: PropTypes.instanceOf(Date).isRequired,
         itemCompleted: PropTypes.func.isRequired,
         deleteItem: PropTypes.func.isRequired,
         editItem: PropTypes.func.isRequired,
-        setTime: PropTypes.func.isRequired,
+        startTimer: PropTypes.func.isRequired,
+        pauseTimer: PropTypes.func.isRequired,
         paused: PropTypes.bool.isRequired,
-        timerDirection: PropTypes.string.isRequired,
-        setDirection: PropTypes.func.isRequired,
     };
 
     state = {
         editing: false,
         text: this.props.label,
-        timer: this.props.time,
-        wasPaused: this.props.paused,
-        updating: false,
-        timerDir: this.props.timerDirection,
+        editingText: this.props.label,
     };
 
-    componentWillUnmount() {
-        const { setTime, id } = this.props;
-        const { timer } = this.state;
-        this.pauseTimer();
-        setTime(id, timer);
-        clearInterval(this.state.timerInt);
-    }
-
     handlerInput = (event) => {
+        const newText = event.target.children[0].value;
         event.preventDefault();
         this.setState({
             editing: false,
+            text: newText,
         });
-        this.props.editItem(this.props.id, this.state.text);
+        this.props.editItem(this.props.id, newText);
     };
 
     handlerEdit = (event) => {
@@ -57,44 +46,14 @@ export default class Task extends Component {
         this.setState(() => ({ editing: true }));
     };
 
+    handlerExit = () => {
+        this.setState({
+            editing: false,
+            editingText: this.props.label,
+        });
+    };
+
     formatDate = (date) => formatDistanceToNow(date, { includeSeconds: true, addSuffix: true });
-
-    startTimer = () => {
-        if (this.state.updating) return;
-        const { timer, wasPaused } = this.state;
-        const { setDirection, id, checked } = this.props;
-        if (checked) return;
-        this.setState({ updating: true });
-        if (!wasPaused) {
-            const timerDirection = timer === 0 ? 'up' : 'down';
-            setDirection(id, timerDirection);
-            this.setState({ timerDir: timerDirection });
-        }
-        const timerInt = setInterval(() => this.updateTime(), 1000);
-        this.setState({ timerInt });
-    };
-
-    pauseTimer = () => {
-        if (!this.state.updating) return;
-        clearInterval(this.state.timerInt);
-        this.setState({ updating: false });
-        this.setState({ wasPaused: true });
-    };
-
-    updateTime = () => {
-        const { timerDir } = this.state;
-        if (timerDir === 'down') {
-            if (this.state.timer > 0) {
-                this.setState(({ timer }) => ({
-                    timer: timer - 1,
-                }));
-            } else this.pauseTimer();
-        } else if (timerDir === 'up') {
-            this.setState(({ timer }) => ({
-                timer: timer + 1,
-            }));
-        }
-    };
 
     formatTime = (time) => {
         const hours = Math.floor(time / 3600);
@@ -108,12 +67,11 @@ export default class Task extends Component {
     };
 
     render() {
-        const { id, checked, created, itemCompleted, deleteItem } = this.props;
-        const { editing, text, timer } = this.state;
-        // eslint-disable-next-line max-len
-        // const formatedTime = timer >= 3600000 ? format(timer, 'hh:mm:ss') : format(timer, 'mm:ss');
+        const { id, checked, created, itemCompleted, deleteItem, startTimer, pauseTimer, timer } = this.props;
+        const { editing, text, editingText } = this.state;
         const formatedTime = this.formatTime(timer);
         const formatedDate = this.formatDate(created);
+
         return (
             <li className={checked ? 'completed' : editing ? 'editing' : null}>
                 <div className="view">
@@ -122,7 +80,7 @@ export default class Task extends Component {
                         type="checkbox"
                         checked={checked}
                         onChange={() => {
-                            this.pauseTimer();
+                            pauseTimer(id);
                             itemCompleted(id, !checked);
                         }}
                     />
@@ -132,22 +90,22 @@ export default class Task extends Component {
                             <button
                                 className="icon icon-play"
                                 type="button"
-                                onClick={this.startTimer}
+                                onClick={() => {
+                                    if (this.props.paused) startTimer(id);
+                                }}
                             />
                             <button
                                 className="icon icon-pause"
                                 type="button"
-                                onClick={this.pauseTimer}
+                                onClick={() => {
+                                    if (!this.props.paused) pauseTimer(id);
+                                }}
                             />
                             <span className="time">{formatedTime}</span>
                         </span>
                         <span className="created">{`created ${formatedDate}`}</span>
                     </label>
-                    <button
-                        className="icon icon-edit"
-                        onClick={(event) => this.handlerEdit(event)}
-                        type="button"
-                    />
+                    <button className="icon icon-edit" onClick={(event) => this.handlerEdit(event)} type="button" />
                     <button
                         className="icon icon-destroy"
                         onClick={(event) => {
@@ -160,10 +118,14 @@ export default class Task extends Component {
                 {editing && (
                     <form onSubmit={this.handlerInput}>
                         <input
-                            onChange={(event) => this.setState({ text: event.target.value })}
+                            onChange={(event) => this.setState({ editingText: event.target.value })}
                             type="text"
                             className="edit"
-                            value={text}
+                            value={editingText}
+                            onKeyUp={(key) => {
+                                if (key.key === 'Escape') this.handlerExit();
+                            }}
+                            autoFocus
                         />
                     </form>
                 )}

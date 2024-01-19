@@ -10,11 +10,13 @@ export default class TaskList extends Component {
         deleteItem: PropTypes.func.isRequired,
         editItem: PropTypes.func.isRequired,
         setTime: PropTypes.func.isRequired,
-        setDirection: PropTypes.func.isRequired,
+        startTimer: PropTypes.func.isRequired,
+        pauseTimer: PropTypes.func.isRequired,
+        updateTimer: PropTypes.func.isRequired,
     };
 
     render() {
-        const { todos, itemCompleted, deleteItem, editItem, setTime, setDirection } = this.props;
+        const { todos, itemCompleted, deleteItem, editItem, setTime, startTimer, pauseTimer, updateTimer } = this.props;
 
         const elements = todos.map((item) => (
             <Task
@@ -27,7 +29,9 @@ export default class TaskList extends Component {
                 deleteItem={deleteItem}
                 editItem={editItem}
                 setTime={setTime}
-                setDirection={setDirection}
+                startTimer={startTimer}
+                pauseTimer={pauseTimer}
+                updateTimer={updateTimer}
                 {...item}
             />
         ));
