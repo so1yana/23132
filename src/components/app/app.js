@@ -21,6 +21,7 @@ export default class App extends Component {
             id,
             checked: false,
             timer,
+            startTime: timer,
             label,
             created: new Date(),
             paused: true,
@@ -42,7 +43,8 @@ export default class App extends Component {
             if (elem.id === id) {
                 if (typeof value === 'string') {
                     if (value === 'updateTime') {
-                        elem.timer += 1;
+                        if (elem.timer > 0 && elem.startTime > 0) elem.timer -= 1;
+                        else elem.timer += 1;
                     } else if (value === 'startTimer' && !elem.checked) {
                         const interval = setInterval(() => this.updateTimer(elem.id), 1000);
                         elem.interval = interval;
@@ -50,6 +52,7 @@ export default class App extends Component {
                     } else if (value === 'pauseTimer' && !elem.paused) {
                         clearInterval(elem.interval);
                         elem.paused = true;
+                        if (!elem.wasPaused) elem.wasPaused = true;
                     } else elem.label = value;
                 } else if (typeof value === 'boolean') elem.checked = value;
             }

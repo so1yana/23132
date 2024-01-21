@@ -71,6 +71,11 @@ export default class Task extends Component {
         const { editing, text, editingText } = this.state;
         const formatedTime = this.formatTime(timer);
         const formatedDate = this.formatDate(created);
+        if (this.state.editing) {
+            document.addEventListener('click', (e) => {
+                if (e.target.nodeName === 'HTML') this.handlerExit();
+            });
+        }
 
         return (
             <li className={checked ? 'completed' : editing ? 'editing' : null}>
