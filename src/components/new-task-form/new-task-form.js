@@ -1,74 +1,64 @@
-import { Component } from 'react';
+import { useMemo, useState } from 'react';
 import './new-task-form.css';
 import PropTypes from 'prop-types';
 
-export default class NewTaskForm extends Component {
-    static propTypes = {
-        addItem: PropTypes.func.isRequired,
-    };
-
-    state = {
-        valueTask: '',
-        valueMin: '',
-        valueSec: '',
-    };
-
-    clearValue = () => {
-        this.setState({
+export default function NewTaskForm(props) {
+    const initialState = useMemo(
+        () => ({
             valueTask: '',
             valueMin: '',
             valueSec: '',
-        });
+        }),
+        [],
+    );
+
+    const [values, setValues] = useState(initialState);
+
+    const clearValue = () => {
+        setValues(initialState);
     };
 
-    onSubmit = (event) => {
-        const { valueTask, valueMin, valueSec } = this.state;
+    const onSubmit = (event) => {
         event.preventDefault();
-        this.props.addItem(valueTask, valueMin, valueSec);
-        this.clearValue();
+        const { valueTask, valueMin, valueSec } = values;
+        props.addItem(valueTask, valueMin, valueSec);
+        clearValue();
+        props.filterItems();
     };
 
-    changeValue = (event) => {
+    const changeValue = (event) => {
         if (event.target.placeholder === 'Min') {
-            this.setState({ valueMin: event.target.value });
+            setValues((state) => ({
+                ...state,
+                valueMin: event.target.value,
+            }));
         } else if (event.target.placeholder === 'Sec') {
-            this.setState({ valueSec: event.target.value });
-        } else this.setState({ valueTask: event.target.value });
+            setValues((state) => ({
+                ...state,
+                valueSec: event.target.value,
+            }));
+        } else {
+            setValues((state) => ({
+                ...state,
+                valueTask: event.target.value,
+            }));
+        }
     };
 
-    render() {
-        const { valueTask, valueMin, valueSec } = this.state;
+    const { valueTask, valueMin, valueSec } = values;
 
-        return (
-            <form className="new-todo-form" onSubmit={this.onSubmit}>
-                <h1>Todos</h1>
-                <input
-                    onChange={this.changeValue}
-                    value={valueTask}
-                    className="new-todo"
-                    placeholder="What needs to be done?"
-                    autoFocus
-                />
-                <input
-                    onChange={this.changeValue}
-                    className="new-todo-form__timer"
-                    placeholder="Min"
-                    value={valueMin}
-                    max={999}
-                    type="number"
-                    autoFocus
-                />
-                <input
-                    onChange={this.changeValue}
-                    className="new-todo-form__timer"
-                    placeholder="Sec"
-                    value={valueSec}
-                    max={59}
-                    type="number"
-                    autoFocus
-                />
-                <button type="submit" />
-            </form>
-        );
-    }
+    return (
+        <form className="new-todo-form" onSubmit={onSubmit}>
+            <h1>Todos</h1>
+            <input onChange={changeValue} value={valueTask} className="new-todo" placeholder="What needs to be done?" autoFocus />
+            <input onChange={changeValue} className="new-todo-form__timer" placeholder="Min" value={valueMin} max={999} type="number" />
+            <input onChange={changeValue} className="new-todo-form__timer" placeholder="Sec" value={valueSec} max={59} type="number" />
+            <button type="submit" />
+        </form>
+    );
 }
+
+NewTaskForm.propTypes = {
+    addItem: PropTypes.func.isRequired,
+    filterItems: PropTypes.func.isRequired,
+};
