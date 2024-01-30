@@ -26,6 +26,7 @@ export default function Task(props) {
         }, 1000);
         if (paused) clearInterval(interval);
         return () => clearInterval(interval);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [time, paused]);
 
     const handlerInput = (event) => {

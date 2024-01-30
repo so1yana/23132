@@ -27,6 +27,7 @@ export default function App() {
 
     useEffect(() => {
         filterItems();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [filter]);
 
     const makeItem = (label, min, sec) => {
@@ -64,22 +65,6 @@ export default function App() {
         setFilter(value);
         filterItems();
     };
-
-    // const updateTimer = (id) => {
-    //     console.log(todos);
-    //     setTodos((todo) => {
-    //         // console.log('setting');
-    //         const newTodos = todo.map((e) => {
-    //             if (e.id === id) {
-    //                 if (e.timer > 0 && e.startTime > 0) e.timer -= 1;
-    //                 else e.timer += 1;
-    //             }
-    //             // console.log('returning');
-    //             return e;
-    //         });
-    //         return newTodos;
-    //     });
-    // };
 
     const changeItem = (id, value) => {
         const newArr = todos.map((elem) => {
